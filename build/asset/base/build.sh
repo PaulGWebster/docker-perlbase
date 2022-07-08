@@ -20,7 +20,7 @@ fi
 
 echo "Importing object as perlbase:prebase" \
 && docker import "${OBJDIR}/prebase.dockerimg" perlbase:prebase \
-&& echo "Import successful" \
+&& echo "Import successful, removing object" \
 && rm "${OBJDIR}/prebase.dockerimg"
 
 echo "Recreating gcc tarbell, if it does not exist"
@@ -29,7 +29,7 @@ if [ ! -f "obj/gcc-12.1.0.tar.gz" ];
 then
    cd "${REPODIR}/split/gcc1.12.0" \
    && cat * > "${OBJDIR}/gcc-12.1.0.tar.gz" \
-   && cd "${ORIGIN}" 
+   && cd "${ORIGIN}"
 else
    echo "Tarbell already exists"
 fi
@@ -45,4 +45,9 @@ cp ${REPODIR}/packed/automake-* ${OBJDIR}/   \
 && cp ${REPODIR}/packed/mpfr-* ${OBJDIR}/       \
 && echo "Source preperation success: "
 
-ls "${OBJDIR}"
+docker build . -t perlbase:base || exit 1
+
+echo "Cleaning: ${OBJDIR}"
+rm -Rfv ${OBJDIR}/*
+
+echo "base build success"
